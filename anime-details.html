@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anime Details</title>
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #0d0d0d;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+    .back {
+      background-color: #ff4081;
+      padding: 10px 20px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .details {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .poster {
+      flex: 1 1 300px;
+    }
+    .poster img {
+      width: 100%;
+      border-radius: 12px;
+    }
+    .info {
+      flex: 2 1 500px;
+    }
+    .info h1 {
+      margin-top: 0;
+    }
+    .info .meta {
+      font-size: 0.95rem;
+      margin: 10px 0;
+      color: #bbb;
+    }
+    .info p {
+      line-height: 1.6;
+    }
+    iframe {
+      margin-top: 20px;
+      width: 100%;
+      height: 360px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="index.html">← Back to Home</a>
+    <div class="details" id="anime-details"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function getAnimeDetails() {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+      const { data: anime } = await res.json();
+
+      document.title = \`\${anime.title} | Anime Details\`;
+
+      const genres = anime.genres.map(g => g.name).join(', ') || 'Unknown';
+      const trailer = anime.trailer?.embed_url;
+
+      const html = \`
+        <div class="poster">
+          <img src="\${anime.images.jpg.image_url}" alt="\${anime.title}">
+        </div>
+        <div class="info">
+          <h1>\${anime.title}</h1>
+          <div class="meta">
+            <strong>Type:</strong> \${anime.type} |
+            <strong>Episodes:</strong> \${anime.episodes || 'N/A'} |
+            <strong>Status:</strong> \${anime.status} |
+            <strong>Score:</strong> \${anime.score || 'N/A'}<br>
+            <strong>Genres:</strong> \${genres}
+          </div>
+          <p>\${anime.synopsis || "No synopsis available."}</p>
+          \${trailer ? \`<iframe src="\${trailer}" allowfullscreen></iframe>\` : ""}
+        </div>
+      \`;
+
+      document.getElementById("anime-details").innerHTML = html;
+    }
+
+    getAnimeDetails();
+  </script>
+</body>
+</html>
