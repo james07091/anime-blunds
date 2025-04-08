@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anime Details</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
@@ -58,8 +58,9 @@
     iframe {
       margin-top: 20px;
       width: 100%;
-      height: 360px;
+      height: 500px;
       border: none;
+      display: none;
     }
     .episodes, .related {
       margin-top: 40px;
@@ -81,21 +82,9 @@
       display: inline-block;
       color: #fff;
       transition: background 0.2s;
-      cursor: pointer;
     }
     .episode-list a:hover, .related-list a:hover {
       background-color: #ff4081;
-    }
-    /* Video Player */
-    .player-container {
-      margin-top: 30px;
-    }
-    #video-player {
-      width: 100%;
-      height: 400px;
-      display: none;
-      border-radius: 10px;
-      background: black;
     }
   </style>
 </head>
@@ -103,21 +92,19 @@
   <div class="container">
     <a class="back" href="index.html">← Back to Home</a>
     <div class="details" id="anime-details"></div>
-
+    
     <div class="episodes">
       <h2>Episodes</h2>
       <div class="episode-list" id="episode-list"></div>
-    </div>
-
-    <!-- Video Player (Hidden Until an Episode is Clicked) -->
-    <div class="player-container">
-      <iframe id="video-player" allowfullscreen></iframe>
     </div>
 
     <div class="related">
       <h2>Related Anime</h2>
       <div class="related-list" id="related-list"></div>
     </div>
+
+    <!-- Video Player -->
+    <iframe id="video-player" allowfullscreen></iframe>
   </div>
 
   <script>
@@ -146,58 +133,4 @@
             <strong>Genres:</strong> ${genres}
           </div>
           <p>${anime.synopsis || "No synopsis available."}</p>
-          ${trailer ? `<iframe src="${trailer}" allowfullscreen></iframe>` : ""}
-        </div>
-      `;
-
-      document.getElementById("anime-details").innerHTML = html;
-    }
-
-    async function getEpisodes() {
-      const container = document.getElementById("episode-list");
-      container.innerHTML = "";
-
-      // Using ConsuMet API to fetch streaming links
-      const apiURL = `https://consumet-api-url/anime/gogoanime/watch/${id}-episode-`; 
-
-      for (let i = 1; i <= 12; i++) {  // Change the number of episodes as needed
-        const link = document.createElement("a");
-        link.href = "#";  
-        link.textContent = `Episode ${i}`;
-        
-        link.onclick = async function (e) {
-          e.preventDefault();
-          playEpisode(apiURL + i);
-        };
-
-        container.appendChild(link);
-      }
-    }
-
-    function playEpisode(episodeURL) {
-      const player = document.getElementById("video-player");
-      player.src = episodeURL;  
-      player.style.display = "block";
-    }
-
-    async function getRelatedAnime() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/relations`);
-      const { data: relations } = await res.json();
-      const container = document.getElementById("related-list");
-
-      relations.forEach(rel => {
-        rel.entry.forEach(anime => {
-          const link = document.createElement("a");
-          link.href = `anime-details.html?id=${anime.mal_id}`;
-          link.textContent = anime.name;
-          container.appendChild(link);
-        });
-      });
-    }
-
-    getAnimeDetails();
-    getEpisodes();
-    getRelatedAnime();
-  </script>
-</body>
-</html>
+          ${tr
