@@ -91,14 +91,21 @@
   <div class="container">
     <a class="back" href="index.html">← Back to Home</a>
     <div class="details" id="anime-details"></div>
+    
     <div class="episodes">
       <h2>Episodes</h2>
       <div class="episode-list" id="episode-list"></div>
     </div>
+
     <div class="related">
       <h2>Related Anime</h2>
       <div class="related-list" id="related-list"></div>
     </div>
+
+    <!-- Video Player (Hidden by Default) -->
+    <video id="video-player" width="640" height="360" controls style="display: none;">
+      Your browser does not support the video tag.
+    </video>
   </div>
 
   <script>
@@ -134,40 +141,28 @@
       document.getElementById("anime-details").innerHTML = html;
     }
 
-    async function getEpisodes() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/episodes`);
-      const { data: episodes } = await res.json();
+    function getEpisodes() {
       const container = document.getElementById("episode-list");
-      episodes.forEach(ep => {
+      container.innerHTML = ""; 
+
+      for (let i = 1; i <= 12; i++) {  // Assuming 12 episodes for now
         const link = document.createElement("a");
-        async function getEpisodes() {
-  const container = document.getElementById("episode-list");
-  container.innerHTML = ""; 
+        link.href = "#";  // ✅ Prevents redirection
+        link.textContent = `Episode ${i}`;
+        
+        link.onclick = function (e) {
+          e.preventDefault();
+          playEpisode(i);
+        };
 
-  for (let i = 1; i <= 12; i++) {  // Assuming 12 episodes for now
-    const link = document.createElement("a");
-    link.href = "#";  // ✅ Prevents redirection
-    link.textContent = `Episode ${i}`;
-    
-    link.onclick = function (e) {
-      e.preventDefault();
-      playEpisode(i);
-    };
-
-    container.appendChild(link);
-  }
-}
-
-function playEpisode(episodeNumber) {
-  const player = document.getElementById("video-player");
-  player.src = `videos/episode${episodeNumber}.mp4`;  // ✅ Loads local video
-  player.style.display = "block";
-}
-
-        link.target = "_blank";
-        link.textContent = `Episode ${ep.mal_id}`;
         container.appendChild(link);
-      });
+      }
+    }
+
+    function playEpisode(episodeNumber) {
+      const player = document.getElementById("video-player");
+      player.src = `videos/episode${episodeNumber}.mp4`;  // ✅ Loads local video
+      player.style.display = "block";
     }
 
     async function getRelatedAnime() {
