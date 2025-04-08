@@ -58,9 +58,8 @@
     iframe {
       margin-top: 20px;
       width: 100%;
-      height: 500px;
+      height: 360px;
       border: none;
-      display: none;
     }
     .episodes, .related {
       margin-top: 40px;
@@ -85,6 +84,12 @@
     }
     .episode-list a:hover, .related-list a:hover {
       background-color: #ff4081;
+    }
+    #video-player {
+      width: 100%;
+      height: 500px;
+      margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
@@ -112,14 +117,14 @@
     const id = params.get("id");
 
     async function getAnimeDetails() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+      const res = await fetch(https://api.jikan.moe/v4/anime/${id});
       const { data: anime } = await res.json();
 
-      document.title = `${anime.title} | Anime Details`;
+      document.title = ${anime.title} | Anime Details;
       const genres = anime.genres.map(g => g.name).join(', ') || 'Unknown';
       const trailer = anime.trailer?.embed_url;
 
-      const html = `
+      const html = 
         <div class="poster">
           <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
         </div>
@@ -133,4 +138,68 @@
             <strong>Genres:</strong> ${genres}
           </div>
           <p>${anime.synopsis || "No synopsis available."}</p>
-          ${tr
+          ${trailer ? <iframe src="${trailer}" allowfullscreen></iframe> : ""}
+        </div>
+      ;
+
+      document.getElementById("anime-details").innerHTML = html;
+    }
+
+    async function getEpisodes() {
+      const container = document.getElementById("episode-list");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= 12; i++) { // Assuming 12 episodes for now
+        const link = document.createElement("a");
+        link.href = "#";  // Prevents redirection
+        link.textContent = Episode ${i};
+
+        link.onclick = function (e) {
+          e.preventDefault();
+          playEpisode(i);
+        };
+
+        container.appendChild(link);
+      }
+    }
+
+    async function playEpisode(episodeNumber) {
+      const videoPlayer = document.getElementById("video-player");
+
+      // Fetch streaming link from Gogoanime API
+      try {
+        const res = await fetch(https://api.consumet.org/anime/gogoanime/watch/one-piece-episode-${episodeNumber});
+        const data = await res.json();
+
+        if (data.sources && data.sources.length > 0) {
+          videoPlayer.src = data.sources[0].url;
+          videoPlayer.style.display = "block";
+        } else {
+          alert("Episode not available");
+        }
+      } catch (error) {
+        console.error("Error fetching episode:", error);
+        alert("Failed to load episode.");
+      }
+    }
+
+    async function getRelatedAnime() {
+      const res = await fetch(https://api.jikan.moe/v4/anime/${id}/relations);
+      const { data: relations } = await res.json();
+      const container = document.getElementById("related-list");
+      relations.forEach(rel => {
+        rel.entry.forEach(anime => {
+          const link = document.createElement("a");
+          link.href = anime-details.html?id=${anime.mal_id};
+          link.textContent = anime.name;
+          container.appendChild(link);
+        });
+      });
+    }
+
+    getAnimeDetails();
+    getEpisodes();
+    getRelatedAnime();
+  </script>
+</body>
+</html>
