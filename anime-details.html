@@ -81,6 +81,7 @@
       display: inline-block;
       color: #fff;
       transition: background 0.2s;
+      cursor: pointer;
     }
     .episode-list a:hover, .related-list a:hover {
       background-color: #ff4081;
@@ -114,12 +115,11 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const animeTitle = params.get("title"); 
+    const id = params.get("id");
 
     async function getAnimeDetails() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${animeTitle}`);
-      const { data } = await res.json();
-      const anime = data[0]; 
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+      const { data: anime } = await res.json();
 
       document.title = `${anime.title} | Anime Details`;
       const genres = anime.genres.map(g => g.name).join(', ') || 'Unknown';
@@ -144,42 +144,35 @@
       `;
 
       document.getElementById("anime-details").innerHTML = html;
-
-      // Fetch episodes
-      getEpisodes(animeTitle);
+      getEpisodes(anime.title);
     }
 
-    async function getEpisodes(title) {
+    async function getEpisodes(animeTitle) {
       const container = document.getElementById("episode-list");
       container.innerHTML = "";
 
-      try {
-        const res = await fetch(`https://api.consumet.org/anime/gogoanime/info/${title.replace(/ /g, "-").toLowerCase()}`);
-        const { episodes } = await res.json();
+      for (let i = 1; i <= 12; i++) { // Assuming 12 episodes for now
+        const link = document.createElement("a");
+        link.href = "#";  // Prevents redirection
+        link.textContent = `Episode ${i}`;
 
-        episodes.forEach((ep, index) => {
-          const link = document.createElement("a");
-          link.href = "#";  
-          link.textContent = `Episode ${index + 1}`;
+        link.onclick = function (e) {
+          e.preventDefault();
+          playEpisode(animeTitle, i);
+        };
 
-          link.onclick = function (e) {
-            e.preventDefault();
-            playEpisode(ep.id);
-          };
-
-          container.appendChild(link);
-        });
-      } catch (error) {
-        console.error("Error fetching episodes:", error);
-        container.innerHTML = "<p>Episodes not available.</p>";
+        container.appendChild(link);
       }
     }
 
-    async function playEpisode(episodeId) {
+    async function playEpisode(animeTitle, episodeNumber) {
       const videoPlayer = document.getElementById("video-player");
 
+      // Format anime title to match Gogoanime API format
+      const formattedTitle = animeTitle.toLowerCase().replace(/\s+/g, "-");
+
       try {
-        const res = await fetch(`https://api.consumet.org/anime/gogoanime/watch/${episodeId}`);
+        const res = await fetch(`https://api.consumet.org/anime/gogoanime/watch/${formattedTitle}-episode-${episodeNumber}`);
         const data = await res.json();
 
         if (data.sources && data.sources.length > 0) {
@@ -194,7 +187,22 @@
       }
     }
 
+    async function getRelatedAnime() {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/relations`);
+      const { data: relations } = await res.json();
+      const container = document.getElementById("related-list");
+      relations.forEach(rel => {
+        rel.entry.forEach(anime => {
+          const link = document.createElement("a");
+          link.href = `anime-details.html?id=${anime.mal_id}`;
+          link.textContent = anime.name;
+          container.appendChild(link);
+        });
+      });
+    }
+
     getAnimeDetails();
+    getRelatedAnime();
   </script>
 </body>
 </html>
