@@ -140,7 +140,30 @@
       const container = document.getElementById("episode-list");
       episodes.forEach(ep => {
         const link = document.createElement("a");
-        link.href = ep.url;
+        async function getEpisodes() {
+  const container = document.getElementById("episode-list");
+  container.innerHTML = ""; 
+
+  for (let i = 1; i <= 12; i++) {  // Assuming 12 episodes for now
+    const link = document.createElement("a");
+    link.href = "#";  // ✅ Prevents redirection
+    link.textContent = `Episode ${i}`;
+    
+    link.onclick = function (e) {
+      e.preventDefault();
+      playEpisode(i);
+    };
+
+    container.appendChild(link);
+  }
+}
+
+function playEpisode(episodeNumber) {
+  const player = document.getElementById("video-player");
+  player.src = `videos/episode${episodeNumber}.mp4`;  // ✅ Loads local video
+  player.style.display = "block";
+}
+
         link.target = "_blank";
         link.textContent = `Episode ${ep.mal_id}`;
         container.appendChild(link);
