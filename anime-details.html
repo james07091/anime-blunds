@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Anime Details</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
@@ -81,16 +81,9 @@
       display: inline-block;
       color: #fff;
       transition: background 0.2s;
-      cursor: pointer;
     }
     .episode-list a:hover, .related-list a:hover {
       background-color: #ff4081;
-    }
-    #video-player {
-      width: 100%;
-      height: 500px;
-      margin-top: 20px;
-      display: none;
     }
   </style>
 </head>
@@ -98,19 +91,18 @@
   <div class="container">
     <a class="back" href="index.html">← Back to Home</a>
     <div class="details" id="anime-details"></div>
-    
     <div class="episodes">
       <h2>Episodes</h2>
       <div class="episode-list" id="episode-list"></div>
     </div>
-
+    <div style="margin-top: 30px;">
+      <h2>Streaming Player</h2>
+      <iframe id="video-player" width="100%" height="500px" src="" frameborder="0" allowfullscreen style="display:none; border-radius:12px;"></iframe>
+    </div>
     <div class="related">
       <h2>Related Anime</h2>
       <div class="related-list" id="related-list"></div>
     </div>
-
-    <!-- Video Player -->
-    <iframe id="video-player" allowfullscreen></iframe>
   </div>
 
   <script>
@@ -144,47 +136,38 @@
       `;
 
       document.getElementById("anime-details").innerHTML = html;
-      getEpisodes(anime.title);
     }
 
-    async function getEpisodes(animeTitle) {
+    async function getEpisodes() {
       const container = document.getElementById("episode-list");
       container.innerHTML = "";
 
-      for (let i = 1; i <= 12; i++) { // Assuming 12 episodes for now
-        const link = document.createElement("a");
-        link.href = "#";  // Prevents redirection
-        link.textContent = `Episode ${i}`;
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/episodes`);
+      const { data: episodes } = await res.json();
 
-        link.onclick = function (e) {
+      const animeDetailsRes = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+      const { data: anime } = await animeDetailsRes.json();
+
+      const animeTitleSlug = anime.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+
+      episodes.forEach((ep, index) => {
+        const link = document.createElement("a");
+        link.href = "#";
+        link.textContent = `Episode ${index + 1}`;
+
+        link.onclick = function(e) {
           e.preventDefault();
-          playEpisode(animeTitle, i);
+          playEpisode(animeTitleSlug, index + 1);
         };
 
         container.appendChild(link);
-      }
+      });
     }
 
-    async function playEpisode(animeTitle, episodeNumber) {
-      const videoPlayer = document.getElementById("video-player");
-
-      // Format anime title to match Gogoanime API format
-      const formattedTitle = animeTitle.toLowerCase().replace(/\s+/g, "-");
-
-      try {
-        const res = await fetch(`https://api.consumet.org/anime/gogoanime/watch/${formattedTitle}-episode-${episodeNumber}`);
-        const data = await res.json();
-
-        if (data.sources && data.sources.length > 0) {
-          videoPlayer.src = data.sources[0].url;
-          videoPlayer.style.display = "block";
-        } else {
-          alert("Episode not available");
-        }
-      } catch (error) {
-        console.error("Error fetching episode:", error);
-        alert("Failed to load episode.");
-      }
+    function playEpisode(animeSlug, episodeNumber) {
+      const player = document.getElementById("video-player");
+      player.src = `https://yourstreamingsite.com/embed/${animeSlug}/episode-${episodeNumber}`;
+      player.style.display = "block";
     }
 
     async function getRelatedAnime() {
@@ -202,6 +185,7 @@
     }
 
     getAnimeDetails();
+    getEpisodes();
     getRelatedAnime();
   </script>
 </body>
