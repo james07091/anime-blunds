@@ -6,85 +6,23 @@
   <title>Anime Details</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Outfit', sans-serif;
-      background-color: #0d0d0d;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    a {
-      color: #ff4081;
-      text-decoration: none;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-    }
-    .back {
-      background-color: #ff4081;
-      padding: 10px 20px;
-      color: #fff;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 20px;
-    }
-    .details {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-    .poster {
-      flex: 1 1 300px;
-    }
-    .poster img {
-      width: 100%;
-      border-radius: 12px;
-    }
-    .info {
-      flex: 2 1 500px;
-    }
-    .info h1 {
-      margin-top: 0;
-    }
-    .meta {
-      font-size: 0.95rem;
-      margin: 10px 0;
-      color: #bbb;
-    }
-    .info p {
-      line-height: 1.6;
-    }
-    iframe {
-      margin-top: 20px;
-      width: 100%;
-      height: 360px;
-      border: none;
-    }
-    .episodes, .related {
-      margin-top: 40px;
-    }
-    .episodes h2, .related h2 {
-      border-bottom: 2px solid #ff4081;
-      padding-bottom: 10px;
-    }
-    .episode-list, .related-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 15px;
-    }
-    .episode-list a, .related-list a {
-      background-color: #1f1f1f;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: inline-block;
-      color: #fff;
-      transition: background 0.2s;
-    }
-    .episode-list a:hover, .related-list a:hover {
-      background-color: #ff4081;
-    }
+    body { font-family: 'Outfit', sans-serif; background-color: #0d0d0d; color: #fff; margin: 0; padding: 20px; }
+    a { color: #ff4081; text-decoration: none; }
+    .container { max-width: 1000px; margin: auto; }
+    .back { background-color: #ff4081; padding: 10px 20px; color: #fff; border-radius: 6px; display: inline-block; margin-bottom: 20px; }
+    .details { display: flex; gap: 30px; flex-wrap: wrap; }
+    .poster { flex: 1 1 300px; }
+    .poster img { width: 100%; border-radius: 12px; }
+    .info { flex: 2 1 500px; }
+    .info h1 { margin-top: 0; }
+    .meta { font-size: 0.95rem; margin: 10px 0; color: #bbb; }
+    .info p { line-height: 1.6; }
+    iframe { margin-top: 20px; width: 100%; height: 360px; border: none; border-radius:12px; }
+    .episodes, .related { margin-top: 40px; }
+    .episodes h2, .related h2 { border-bottom: 2px solid #ff4081; padding-bottom: 10px; }
+    .episode-list, .related-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; }
+    .episode-list a, .related-list a { background-color: #1f1f1f; padding: 10px 15px; border-radius: 8px; display: inline-block; color: #fff; transition: background 0.2s; }
+    .episode-list a:hover, .related-list a:hover { background-color: #ff4081; }
   </style>
 </head>
 <body>
@@ -97,7 +35,10 @@
     </div>
     <div style="margin-top: 30px;">
       <h2>Streaming Player</h2>
-      <iframe id="video-player" width="100%" height="500px" src="" frameborder="0" allowfullscreen style="display:none; border-radius:12px;"></iframe>
+      <iframe id="video-player" width="100%" height="500px" src="" frameborder="0" allowfullscreen style="display:none;"></iframe>
+      <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
+        <p>Loading episode...</p>
+      </div>
     </div>
     <div class="related">
       <h2>Related Anime</h2>
@@ -166,8 +107,17 @@
 
     function playEpisode(animeSlug, episodeNumber) {
       const player = document.getElementById("video-player");
-      player.src = `https://yourstreamingsite.com/embed/${animeSlug}/episode-${episodeNumber}`;
-      player.style.display = "block";
+      const spinner = document.getElementById("loading-spinner");
+
+      spinner.style.display = "block";
+      player.style.display = "none";
+
+      player.src = `https://animepahe.ru/play/${animeSlug}-episode-${episodeNumber}`;
+
+      player.onload = () => {
+        spinner.style.display = "none";
+        player.style.display = "block";
+      };
     }
 
     async function getRelatedAnime() {
