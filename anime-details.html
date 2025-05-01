@@ -58,24 +58,23 @@
     iframe {
       margin-top: 20px;
       width: 100%;
-      height: 500px;
+      height: 360px;
       border: none;
-      border-radius: 12px;
     }
-    .episodes {
+    .episodes, .related {
       margin-top: 40px;
     }
-    .episodes h2 {
+    .episodes h2, .related h2 {
       border-bottom: 2px solid #ff4081;
       padding-bottom: 10px;
     }
-    .episode-list {
+    .episode-list, .related-list {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 15px;
     }
-    .episode-list a {
+    .episode-list a, .related-list a {
       background-color: #1f1f1f;
       padding: 10px 15px;
       border-radius: 8px;
@@ -83,7 +82,7 @@
       color: #fff;
       transition: background 0.2s;
     }
-    .episode-list a:hover {
+    .episode-list a:hover, .related-list a:hover {
       background-color: #ff4081;
     }
   </style>
@@ -96,75 +95,98 @@
       <h2>Episodes</h2>
       <div class="episode-list" id="episode-list"></div>
     </div>
-    <div style="margin-top: 30px;">
-      <h2>Streaming Player</h2>
-      <iframe id="video-player" style="display: none;" allowfullscreen></iframe>
+    <div class="related">
+      <h2>Related Anime</h2>
+      <div class="related-list" id="related-list"></div>
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const animeTitle = params.get("title");
+    const id = params.get("id");
 
-    async function fetchAnimeZoro(title) {
-      const searchRes = await fetch(`https://api.consumet.org/anime/zoro/${encodeURIComponent(title)}`);
-      const searchData = await searchRes.json();
-      return searchData.results?.[0];
-    }
+    async function getAnimeDetails() {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+      const { data: anime } = await res.json();
 
-    async function fetchEpisodesZoro(id) {
-      const res = await fetch(`https://api.consumet.org/anime/zoro/episodes/${id}`);
-      const data = await res.json();
-      return data.episodes || [];
-    }
-
-    async function fetchEmbedUrl(episodeId) {
-      const res = await fetch(`https://api.consumet.org/anime/zoro/watch?episodeId=${episodeId}`);
-      const data = await res.json();
-      return data?.embedUrl;
-    }
-
-    async function init() {
-      const anime = await fetchAnimeZoro(animeTitle);
-      if (!anime) {
-        document.getElementById("anime-details").innerHTML = '<p>Anime not found.</p>';
-        return;
-      }
+      document.title = `${anime.title} | Anime Details`;
+      const genres = anime.genres.map(g => g.name).join(', ') || 'Unknown';
+      const trailer = anime.trailer?.embed_url;
 
       const html = `
         <div class="poster">
-          <img src="${anime.image}" alt="${anime.title}">
+          <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
         </div>
         <div class="info">
           <h1>${anime.title}</h1>
           <div class="meta">
             <strong>Type:</strong> ${anime.type} |
-            <strong>Status:</strong> ${anime.status}<br>
-            <strong>Sub/Dub:</strong> ${anime.subOrDub}
+            <strong>Episodes:</strong> ${anime.episodes || 'N/A'} |
+            <strong>Status:</strong> ${anime.status} |
+            <strong>Score:</strong> ${anime.score || 'N/A'}<br>
+            <strong>Genres:</strong> ${genres}
           </div>
-          <p>${anime.description || "No synopsis available."}</p>
+          <p>${anime.synopsis || "No synopsis available."}</p>
+          ${trailer ? `<iframe src="${trailer}" allowfullscreen></iframe>` : ""}
         </div>
       `;
-      document.getElementById("anime-details").innerHTML = html;
 
-      const episodes = await fetchEpisodesZoro(anime.id);
-      const list = document.getElementById("episode-list");
+      document.getElementById("anime-details").innerHTML = html;
+    }
+
+    async function getEpisodes() {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/episodes`);
+      const { data: episodes } = await res.json();
+      const container = document.getElementById("episode-list");
       episodes.forEach(ep => {
         const link = document.createElement("a");
-        link.href = "#";
-        link.textContent = `Episode ${ep.number}`;
-        link.onclick = async function(e) {
-          e.preventDefault();
-          const embed = await fetchEmbedUrl(ep.id);
-          const player = document.getElementById("video-player");
-          player.src = embed;
-          player.style.display = "block";
-        };
-        list.appendChild(link);
+        async function getEpisodes() {
+  const container = document.getElementById("episode-list");
+  container.innerHTML = ""; 
+
+  for (let i = 1; i <= 12; i++) {  // Assuming 12 episodes for now
+    const link = document.createElement("a");
+    link.href = "#";  // ✅ Prevents redirection
+    link.textContent = `Episode ${i}`;
+    
+    link.onclick = function (e) {
+      e.preventDefault();
+      playEpisode(i);
+    };
+
+    container.appendChild(link);
+  }
+}
+
+function playEpisode(episodeNumber) {
+  const player = document.getElementById("video-player");
+  player.src = `videos/episode${episodeNumber}.mp4`;  // ✅ Loads local video
+  player.style.display = "block";
+}
+
+        link.target = "_blank";
+        link.textContent = `Episode ${ep.mal_id}`;
+        container.appendChild(link);
       });
     }
 
-    init();
+    async function getRelatedAnime() {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/relations`);
+      const { data: relations } = await res.json();
+      const container = document.getElementById("related-list");
+      relations.forEach(rel => {
+        rel.entry.forEach(anime => {
+          const link = document.createElement("a");
+          link.href = `anime-details.html?id=${anime.mal_id}`;
+          link.textContent = anime.name;
+          container.appendChild(link);
+        });
+      });
+    }
+
+    getAnimeDetails();
+    getEpisodes();
+    getRelatedAnime();
   </script>
 </body>
 </html>
