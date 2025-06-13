@@ -6,85 +6,23 @@
   <title>Anime Details</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Outfit', sans-serif;
-      background-color: #0d0d0d;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    a {
-      color: #ff4081;
-      text-decoration: none;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-    }
-    .back {
-      background-color: #ff4081;
-      padding: 10px 20px;
-      color: #fff;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 20px;
-    }
-    .details {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-    .poster {
-      flex: 1 1 300px;
-    }
-    .poster img {
-      width: 100%;
-      border-radius: 12px;
-    }
-    .info {
-      flex: 2 1 500px;
-    }
-    .info h1 {
-      margin-top: 0;
-    }
-    .meta {
-      font-size: 0.95rem;
-      margin: 10px 0;
-      color: #bbb;
-    }
-    .info p {
-      line-height: 1.6;
-    }
-    iframe {
-      margin-top: 20px;
-      width: 100%;
-      height: 360px;
-      border: none;
-    }
-    .episodes, .related {
-      margin-top: 40px;
-    }
-    .episodes h2, .related h2 {
-      border-bottom: 2px solid #ff4081;
-      padding-bottom: 10px;
-    }
-    .episode-list, .related-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 15px;
-    }
-    .episode-list a, .related-list a {
-      background-color: #1f1f1f;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: inline-block;
-      color: #fff;
-      transition: background 0.2s;
-    }
-    .episode-list a:hover, .related-list a:hover {
-      background-color: #ff4081;
-    }
+    body { font-family: 'Outfit', sans-serif; background-color: #0d0d0d; color: #fff; margin: 0; padding: 20px; }
+    a { color: #ff4081; text-decoration: none; }
+    .container { max-width: 1000px; margin: auto; }
+    .back { background-color: #ff4081; padding: 10px 20px; color: #fff; border-radius: 6px; display: inline-block; margin-bottom: 20px; }
+    .details { display: flex; gap: 30px; flex-wrap: wrap; }
+    .poster { flex: 1 1 300px; }
+    .poster img { width: 100%; border-radius: 12px; }
+    .info { flex: 2 1 500px; }
+    .info h1 { margin-top: 0; }
+    .meta { font-size: 0.95rem; margin: 10px 0; color: #bbb; }
+    .info p { line-height: 1.6; }
+    iframe { margin-top: 20px; width: 100%; height: 500px; border: none; border-radius: 12px; }
+    .episodes { margin-top: 40px; }
+    .episodes h2 { border-bottom: 2px solid #ff4081; padding-bottom: 10px; }
+    .episode-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; }
+    .episode-list a { background-color: #1f1f1f; padding: 10px 15px; border-radius: 8px; display: inline-block; color: #fff; transition: background 0.2s; }
+    .episode-list a:hover { background-color: #ff4081; }
   </style>
 </head>
 <body>
@@ -95,98 +33,95 @@
       <h2>Episodes</h2>
       <div class="episode-list" id="episode-list"></div>
     </div>
-    <div class="related">
-      <h2>Related Anime</h2>
-      <div class="related-list" id="related-list"></div>
+    <div style="margin-top: 30px;">
+      <h2>Streaming Player</h2>
+      <iframe id="video-player" style="display: none;" allowfullscreen></iframe>
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    const title = params.get("title");
 
-    async function getAnimeDetails() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
-      const { data: anime } = await res.json();
+    async function fetchJikanDetails(title) {
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      const { data } = await res.json();
+      return data?.[0];
+    }
 
-      document.title = `${anime.title} | Anime Details`;
-      const genres = anime.genres.map(g => g.name).join(', ') || 'Unknown';
-      const trailer = anime.trailer?.embed_url;
+    async function fetchZoroAnime(title) {
+      const res = await fetch(`https://api.consumet.org/anime/zoro/${encodeURIComponent(title)}`);
+      const data = await res.json();
+      return data.results?.[0];
+    }
+
+    async function fetchZoroEpisodes(id) {
+      const res = await fetch(`https://api.consumet.org/anime/zoro/episodes/${id}`);
+      const data = await res.json();
+      return data.episodes || [];
+    }
+
+    async function fetchEmbedUrl(episodeId) {
+      const res = await fetch(`https://api.consumet.org/anime/zoro/watch?episodeId=${episodeId}`);
+      const data = await res.json();
+      return data?.embedUrl;
+    }
+
+    async function init() {
+      const jikan = await fetchJikanDetails(title);
+      const zoro = await fetchZoroAnime(title);
+
+      const container = document.getElementById("anime-details");
+
+      if (!jikan || !zoro) {
+        container.innerHTML = "<p>Anime not found.</p>";
+        return;
+      }
+
+      document.title = jikan.title;
+
+      const genres = jikan.genres.map(g => g.name).join(', ') || 'N/A';
+      const trailer = jikan.trailer?.embed_url;
 
       const html = `
         <div class="poster">
-          <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+          <img src="${jikan.images.jpg.image_url}" alt="${jikan.title}">
         </div>
         <div class="info">
-          <h1>${anime.title}</h1>
+          <h1>${jikan.title}</h1>
           <div class="meta">
-            <strong>Type:</strong> ${anime.type} |
-            <strong>Episodes:</strong> ${anime.episodes || 'N/A'} |
-            <strong>Status:</strong> ${anime.status} |
-            <strong>Score:</strong> ${anime.score || 'N/A'}<br>
+            <strong>Type:</strong> ${jikan.type} |
+            <strong>Episodes:</strong> ${jikan.episodes || 'N/A'} |
+            <strong>Status:</strong> ${jikan.status} |
+            <strong>Score:</strong> ${jikan.score || 'N/A'}<br>
             <strong>Genres:</strong> ${genres}
           </div>
-          <p>${anime.synopsis || "No synopsis available."}</p>
+          <p>${jikan.synopsis || "No synopsis available."}</p>
           ${trailer ? `<iframe src="${trailer}" allowfullscreen></iframe>` : ""}
         </div>
       `;
 
-      document.getElementById("anime-details").innerHTML = html;
-    }
+      container.innerHTML = html;
 
-    async function getEpisodes() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/episodes`);
-      const { data: episodes } = await res.json();
-      const container = document.getElementById("episode-list");
+      const episodes = await fetchZoroEpisodes(zoro.id);
+      const episodeList = document.getElementById("episode-list");
+
       episodes.forEach(ep => {
         const link = document.createElement("a");
-        async function getEpisodes() {
-  const container = document.getElementById("episode-list");
-  container.innerHTML = ""; 
-
-  for (let i = 1; i <= 12; i++) {  // Assuming 12 episodes for now
-    const link = document.createElement("a");
-    link.href = "#";  // ✅ Prevents redirection
-    link.textContent = `Episode ${i}`;
-    
-    link.onclick = function (e) {
-      e.preventDefault();
-      playEpisode(i);
-    };
-
-    container.appendChild(link);
-  }
-}
-
-function playEpisode(episodeNumber) {
-  const player = document.getElementById("video-player");
-  player.src = `videos/episode${episodeNumber}.mp4`;  // ✅ Loads local video
-  player.style.display = "block";
-}
-
-        link.target = "_blank";
-        link.textContent = `Episode ${ep.mal_id}`;
-        container.appendChild(link);
+        link.href = "#";
+        link.textContent = `Episode ${ep.number}`;
+        link.onclick = async function (e) {
+          e.preventDefault();
+          const embed = await fetchEmbedUrl(ep.id);
+          const player = document.getElementById("video-player");
+          player.src = embed;
+          player.style.display = "block";
+        };
+        episodeList.appendChild(link);
       });
     }
 
-    async function getRelatedAnime() {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/relations`);
-      const { data: relations } = await res.json();
-      const container = document.getElementById("related-list");
-      relations.forEach(rel => {
-        rel.entry.forEach(anime => {
-          const link = document.createElement("a");
-          link.href = `anime-details.html?id=${anime.mal_id}`;
-          link.textContent = anime.name;
-          container.appendChild(link);
-        });
-      });
-    }
-
-    getAnimeDetails();
-    getEpisodes();
-    getRelatedAnime();
+    init();
   </script>
 </body>
 </html>
