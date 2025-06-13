@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gogoanime Stream Test</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naruto Shippuden Dub Episode 100</title>
   <style>
     body {
       background-color: #121212;
@@ -21,8 +21,8 @@
   </style>
 </head>
 <body>
-  <h2>Gogoanime Episode Embed Test</h2>
-  <p>This is a fixed iframe stream from Gogoanime for Naruto Shippuden Episode 355 (Dub).</p>
-  <iframe src="https://gogoanime.me.uk/newplayer.php?id=naruto-shippuden-355&ep=8381&type=hd-1&category=dub" allowfullscreen></iframe>
+  <h2>Naruto Shippuden Episode 100 (Dub)</h2>
+  <p>Streaming via extracted Gogoanime player:</p>
+  <iframe src="https://vidstreaming.io/streaming.php?id=Mjg2MQ==" allowfullscreen></iframe>
 </body>
 </html>
