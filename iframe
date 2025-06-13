@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gogoanime Stream Test</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Gogoanime Episode Embed Test</h2>
+  <p>This is a fixed iframe stream from Gogoanime for Naruto Shippuden Episode 355 (Dub).</p>
+  <iframe src="https://gogoanime.me.uk/newplayer.php?id=naruto-shippuden-355&ep=8381&type=hd-1&category=dub" allowfullscreen></iframe>
+</body>
+</html>
