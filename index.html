@@ -142,6 +142,7 @@
     <button id="toggleTheme">Toggle Theme</button>
   </div>
   <div class="anime-grid" id="animeList"></div>
+  <div id="player" style="max-width: 900px; margin: 20px auto;"></div>
   <div class="pagination-controls">
     <button id="prevPage">Previous</button>
     <span id="currentPage">1</span>
@@ -195,7 +196,8 @@
         card.className = "anime-card";
         card.innerHTML = `
           <img src="${anime.images.jpg.image_url}" alt="${anime.title}" />
-          <h3><a href="anime-details.html?id=${anime.mal_id}" style="color: inherit; text-decoration: none;">${anime.title}</a></h3>
+          <h3>${anime.title}</h3>
+<button onclick="playEpisode('https://vidwish.live/stream/s-2/114721/sub')">Ep 1</button>
           <div class="favorite" onclick="toggleFavorite(${anime.mal_id}, this)">★</div>
         `;
         animeList.appendChild(card);
