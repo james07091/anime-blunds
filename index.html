@@ -257,5 +257,33 @@
         margin: 0;
     }
 </style>
+  <!-- Episode Player Section -->
+<div style="text-align: center; padding: 30px;">
+  <h2>Watch Solo Leveling</h2>
+  <div id="episodeButtons">
+    <button onclick="loadEpisode('hd-1')">Episode 1</button>
+    <button onclick="loadEpisode('hd-2')">Episode 2</button>
+    <button onclick="loadEpisode('hd-3')">Episode 3</button>
+    <!-- Add more as needed -->
+  </div>
+
+  <div style="margin-top: 20px;">
+    <iframe 
+      id="videoFrame"
+      width="90%"
+      height="500"
+      src=""
+      frameborder="0"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<script>
+  function loadEpisode(epId) {
+    const iframe = document.getElementById("videoFrame");
+    iframe.src = https://vidwish.live/streaming.php?id=${epId}&type=sub;
+  }
+</script>
 </body>
 </html>
