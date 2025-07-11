@@ -81,6 +81,7 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       transition: transform 0.2s;
       position: relative;
+      padding-bottom: 15px;
     }
     body.light-mode .anime-card {
       background-color: #fff;
@@ -162,7 +163,6 @@
     const currentPageDisplay = document.getElementById("currentPage");
 
     let page = 1;
-    let currentData = [];
     let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
     async function fetchGenres() {
@@ -191,15 +191,10 @@
 
       const res = await fetch(query);
       const data = await res.json();
+      let currentData = data.data;
 
-      currentData = data.data;
-
-      // Sort if needed
-      if (sort === "asc") {
-        currentData.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sort === "desc") {
-        currentData.sort((a, b) => b.title.localeCompare(a.title));
-      }
+      if (sort === "asc") currentData.sort((a, b) => a.title.localeCompare(b.title));
+      if (sort === "desc") currentData.sort((a, b) => b.title.localeCompare(a.title));
 
       renderAnime(currentData);
       currentPageDisplay.textContent = page;
@@ -207,18 +202,54 @@
 
     function renderAnime(data) {
       if (page === 1) animeList.innerHTML = "";
+
       data.forEach(anime => {
         if (genreFilter.value && !anime.genres.find(g => g.name === genreFilter.value)) return;
+
         const isFav = favorites.includes(anime.mal_id);
         const card = document.createElement("div");
         card.className = "anime-card";
+
+        const isSoloLeveling = anime.title.toLowerCase().includes("solo leveling");
+        let extraContent = "";
+
+        if (isSoloLeveling) {
+          extraContent = `
+            <button onclick="togglePlayer('${anime.mal_id}')">▶️ EP 1</button>
+            <div id="player-${anime.mal_id}" style="display: none; margin-top: 15px;">
+              <iframe src="https://vidwish.live/stream/s-2/114721/sub" allow="autoplay; fullscreen" allowfullscreen="yes" frameborder="no" scrolling="no" style="width: 100%; height: 315px; overflow: hidden;"></iframe>
+            </div>
+          `;
+        }
+
         card.innerHTML = `
           <img src="${anime.images.jpg.image_url}" alt="${anime.title}" />
           <h3><a href="anime-details.html?id=${anime.mal_id}" style="color: inherit; text-decoration: none;">${anime.title}</a></h3>
           <div class="favorite" style="opacity: ${isFav ? '1' : '0.3'}" onclick="toggleFavorite(${anime.mal_id}, this)">★</div>
+          ${extraContent}
         `;
+
         animeList.appendChild(card);
       });
+    }
+
+    function togglePlayer(id) {
+      const player = document.getElementById(`player-${id}`);
+      if (player) {
+        player.style.display = player.style.display === "none" ? "block" : "none";
+      }
+    }
+
+    function toggleFavorite(id, el) {
+      const index = favorites.indexOf(id);
+      if (index === -1) {
+        favorites.push(id);
+        el.style.opacity = "1";
+      } else {
+        favorites.splice(index, 1);
+        el.style.opacity = "0.3";
+      }
+      localStorage.setItem("favorites", JSON.stringify(favorites));
     }
 
     function renderFavorites() {
@@ -229,18 +260,6 @@
         results.forEach(r => renderAnime([r.data]));
       });
     }
-
-    window.toggleFavorite = function(id, el) {
-      const index = favorites.indexOf(id);
-      if (index === -1) {
-        favorites.push(id);
-        el.style.opacity = "1";
-      } else {
-        favorites.splice(index, 1);
-        el.style.opacity = "0.3";
-      }
-      localStorage.setItem("favorites", JSON.stringify(favorites));
-    };
 
     toggleTheme.onclick = () => {
       document.body.classList.toggle("light-mode");
@@ -273,4 +292,3 @@
   <script src="https://fpyf8.com/88/tag.min.js" data-zone="155980" async data-cfasync="false"></script>
 </body>
 </html>
-
